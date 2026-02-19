@@ -1,0 +1,28 @@
+body {
+    background-color: lightgray;
+    min-height: 100vh;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.card {
+    border: 0;
+}
+
+.card .btn {
+    white-space: normal;
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 0.875rem;
+        padding-right: 0.875rem;
+    }
+
+    .card .card-body {
+        padding: 1rem !important;
+    }
+}

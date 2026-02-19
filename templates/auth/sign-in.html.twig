@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 text-center mb-4">IDENTIFICARSE</h1>
+
+                    <form action="{{ path('app_sign_in') }}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Email</label>
+                            <input placeholder="Email" type="text" id="username" name="_username" value="{{ last_username }}" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Clave</label>
+                            <input type="password" id="password" name="_password" placeholder="Clave" class="form-control" />
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        {% if error %}
+                            <div class="alert alert-danger py-2 mb-3">
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">INGRESAR</button>
+                        </div>
+
+                        <p class="mb-0 text-center">
+                            Si no tenes cuenta, podes registrarte <a href="{{ path('app_register') }}">aquí</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Términos y Condiciones{% endblock %}
+
+{% block body %}
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-9">
+            <div class="card shadow-sm" id="containterTerms">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 mb-4 text-center">Términos y Condiciones</h1>
+
+    <p>
+        Al registrarse y utilizar esta plataforma, el usuario acepta los presentes
+        Términos y Condiciones en su totalidad. Si no está de acuerdo con alguno de
+        los puntos detallados a continuación, deberá abstenerse de utilizar el sistema.
+    </p>
+
+    <h5 class="mt-4">1. Finalidad del sistema</h5>
+    <p>
+        Esta plataforma es un proyecto sin fines de lucro destinado a llevar un registro
+        de adopciones de mascotas mediante la creación de prontuarios asociados a un DNI.
+        Su objetivo es facilitar la trazabilidad y transparencia en los procesos de adopción.
+    </p>
+
+    <h5 class="mt-4">2. Registro de usuarios</h5>
+    <p>
+        Para poder crear o modificar entradas en un prontuario, el usuario debe registrarse
+        con un correo electrónico válido y una contraseña. El usuario es responsable de
+        mantener la confidencialidad de sus credenciales.
+    </p>
+
+    <h5 class="mt-4">3. Propiedad de los prontuarios</h5>
+    <p>
+        El primer usuario que registre una entrada asociada a un DNI se convierte en el
+        responsable de dicho prontuario. Solo ese usuario podrá agregar nuevas entradas
+        al mismo. Esta medida busca garantizar la integridad y coherencia de la información.
+    </p>
+
+    <h5 class="mt-4">4. Carga de imágenes</h5>
+    <p>
+        Cada prontuario puede contener únicamente una imagen asociada. Una vez cargada,
+        no podrá añadirse otra imagen adicional. El usuario declara tener los derechos
+        necesarios para publicar la imagen y asume plena responsabilidad por su contenido.
+    </p>
+
+    <h5 class="mt-4">5. Responsabilidad del contenido</h5>
+    <p>
+        El usuario es el único responsable de la información que publica en las entradas.
+        La plataforma actúa exclusivamente como medio de registro y no garantiza la
+        veracidad, exactitud o actualización de los datos ingresados.
+    </p>
+
+    <h5 class="mt-4">6. Uso adecuado</h5>
+    <p>
+        Está prohibido utilizar el sistema para publicar información falsa, ofensiva,
+        ilegal o que vulnere derechos de terceros. Los administradores podrán eliminar
+        contenido o restringir cuentas que incumplan estas condiciones.
+    </p>
+
+    <h5 class="mt-4">7. Protección de datos</h5>
+    <p>
+        Los datos personales proporcionados serán utilizados únicamente para el correcto
+        funcionamiento de la plataforma y no serán compartidos con terceros, salvo en caso
+        de requerimiento legal.
+    </p>
+
+    <h5 class="mt-4">8. Modificaciones</h5>
+    <p>
+        La administración se reserva el derecho de modificar estos Términos y Condiciones
+        en cualquier momento. Las modificaciones entrarán en vigencia desde su publicación.
+    </p>
+
+    <p class="text-muted mt-4">
+        Última actualización: {{ "now"|date("d/m/Y") }}
+    </p>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_register') }}" class="btn btn-primary">
+                            Volver al registro
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

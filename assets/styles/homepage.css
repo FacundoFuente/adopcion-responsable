@@ -1,0 +1,43 @@
+#personModal:empty {
+  display: none;
+}
+
+#personModal {
+  margin-top: 0;
+}
+
+#personModal > h3 {
+  margin: 0 0 1rem;
+  padding: 0 0.25rem;
+}
+
+#entriesList {
+  margin-bottom: 1rem;
+}
+
+#entriesList .card {
+  margin-bottom: 0.75rem !important;
+}
+
+#entriesList .card:last-child {
+  margin-bottom: 0 !important;
+}
+
+#personModal .card .card-body {
+  padding: 1.25rem;
+}
+
+#personModal form .d-flex.gap-2 {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+  #personModal .card .card-body {
+    padding: 1rem;
+  }
+
+  #personModal > h3 {
+    margin-bottom: 0.75rem;
+    padding: 0;
+  }
+}

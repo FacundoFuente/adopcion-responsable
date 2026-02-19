@@ -1,0 +1,56 @@
+{% extends "base.html.twig" %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('homepage') }}
+{% endblock %}
+
+{% block javascripts %}
+  {{ encore_entry_script_tags('homepage') }}
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="card-title mb-3">Buscar Prontuario</h3>
+          <p class="text-muted mb-4">Ingresá el DNI para ver el historial de adopciones y agregar nuevas entradas.</p>
+
+          <div class="mb-3">
+            <label for="dni" class="form-label">DNI</label>
+
+            <div class="input-group">
+              <span class="input-group-text">DNI</span>
+              <input
+                type="number"
+                id="dni"
+                name="dni"
+                class="form-control"
+                placeholder="Ej: 30123456"
+                inputmode="numeric"
+              >
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button class="btn btn-primary btn-lg" id="searchButton" type="button">
+              Buscar
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <div id="personModal" class="card shadow-sm "></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
