@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mis prontuarios{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('recordsSearchForm');
+            const input = document.getElementById('dniFilter');
+            const submitBtn = document.getElementById('recordsSearchButton');
+
+            if (!form || !input) {
+                return;
+            }
+
+            const normalizeDni = (value) => String(value ?? '').replace(/\D+/g, '').slice(0, 8);
+            const isValidDniOrEmpty = (dni) => dni === '' || /^\d{7,8}$/.test(dni);
+            const invalidDniMessage = 'Ingresá un DNI válido de 7 u 8 dígitos.';
+            let attemptedSubmit = false;
+
+            const setInputValidity = (isValid) => {
+                input.setCustomValidity(isValid ? '' : invalidDniMessage);
+            };
+
+            const normalizeInputValue = () => {
+                const normalized = normalizeDni(input.value);
+                if (input.value !== normalized) {
+                    input.value = normalized;
+                }
+                return normalized;
+            };
+
+            normalizeInputValue();
+            setInputValidity(isValidDniOrEmpty(input.value));
+
+            input.addEventListener('input', () => {
+                const normalized = normalizeInputValue();
+                if (attemptedSubmit) {
+                    setInputValidity(isValidDniOrEmpty(normalized));
+                } else if (normalized === '' || isValidDniOrEmpty(normalized)) {
+                    setInputValidity(true);
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                const normalized = normalizeInputValue();
+                const isValid = isValidDniOrEmpty(normalized);
+                setInputValidity(isValid);
+                if (attemptedSubmit && !isValid) {
+                    input.reportValidity();
+                }
+            });
+
+            form.addEventListener('submit', (event) => {
+                attemptedSubmit = true;
+                const normalized = normalizeInputValue();
+                const isValid = isValidDniOrEmpty(normalized);
+                setInputValidity(isValid);
+
+                if (!isValid) {
+                    event.preventDefault();
+                    input.reportValidity();
+                    input.focus();
+                    return;
+                }
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    if (!submitBtn.dataset.defaultLabel) {
+                        submitBtn.dataset.defaultLabel = submitBtn.textContent.trim();
+                    }
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Buscando...';
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Mis prontuarios</h1>
+                    <p class="text-muted mb-0">Listado de prontuarios creados con tu cuenta.</p>
+                </div>
+                <a href="{{ path('homepage') }}" class="btn btn-outline-primary my-records-back-btn">Volver al inicio</a>
+            </div>
+
+            <div class="card shadow-sm mb-4 app-surface-card">
+                <div class="card-body">
+                    <form id="recordsSearchForm" method="get" action="{{ path('app_my_records') }}" class="row g-2 align-items-end" novalidate>
+                        <div class="col-12 col-md-6">
+                            <label for="dniFilter" class="form-label mb-1">Buscar por DNI</label>
+                            <input
+                                type="text"
+                                id="dniFilter"
+                                name="dni"
+                                class="form-control"
+                                value="{{ dniFilter }}"
+                                placeholder="Ej: 30123456"
+                                inputmode="numeric"
+                                pattern="[0-9]{7,8}"
+                                maxlength="8"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="col-12 col-md-auto d-grid">
+                            <button id="recordsSearchButton" type="submit" class="btn btn-primary">Buscar</button>
+                        </div>
+                        {% if dniFilter %}
+                            <div class="col-12 col-md-auto d-grid">
+                                <a href="{{ path('app_my_records') }}" class="btn btn-outline-secondary">Limpiar</a>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            {% if records is empty %}
+                <div class="card shadow-sm app-surface-card">
+                    <div class="card-body">
+                        <div class="alert alert-info mb-0">
+                            {% if dniFilter %}
+                                No se encontraron prontuarios para el DNI {{ dniFilter }}.
+                            {% else %}
+                                Todavía no cargaste prontuarios.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row g-3 my-records-grid">
+                    {% for record in records %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100 app-surface-card my-record-card">
+                                <div class="card-body d-flex flex-column my-record-card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                        <h2 class="h5 mb-0 my-record-card-title">DNI {{ record.dni }}</h2>
+                                        <span class="my-record-count-badge">
+                                            {{ record.entriesCount }} {{ record.entriesCount == 1 ? 'entrada' : 'entradas' }}
+                                        </span>
+                                    </div>
+                                    <p class="mb-3 text-muted my-record-meta">
+                                        Última actualización:
+                                        <span class="fw-semibold">{{ record.lastEntryAt ?? 'Sin fecha' }}</span>
+                                    </p>
+
+                                    {% if record.lastEntryText %}
+                                        <div class="my-record-last-entry mb-3">
+                                            <span class="text-muted d-block mb-1 small">Última entrada</span>
+                                            <p class="mb-0">
+                                                {{ record.lastEntryText|length > 180
+                                                    ? record.lastEntryText|slice(0, 180) ~ '...'
+                                                    : record.lastEntryText }}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="mt-auto mb-3 my-record-media-wrap">
+                                        {% if record.photoUrl %}
+                                            <img
+                                                src="{{ record.photoUrl }}"
+                                                alt="Foto de prontuario DNI {{ record.dni }}"
+                                                class="w-100 rounded border my-record-media"
+                                                style="height: 180px; object-fit: cover;"
+                                            >
+                                        {% else %}
+                                            <div
+                                                class="w-100 rounded border d-flex align-items-center justify-content-center text-muted small bg-light my-record-media my-record-media-empty"
+                                                style="height: 180px;"
+                                            >
+                                                Sin foto cargada
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <a href="{{ path('homepage') }}?dni={{ record.dni }}" class="btn btn-primary">
+                                            Ver prontuario
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

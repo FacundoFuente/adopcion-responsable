@@ -16,6 +16,16 @@ img {
     white-space: normal;
 }
 
+.app-surface-card .card-body {
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .app-surface-card .card-body {
+        padding: 1.25rem;
+    }
+}
+
 @media (max-width: 576px) {
     .container {
         padding-left: 0.875rem;
@@ -24,5 +34,244 @@ img {
 
     .card .card-body {
         padding: 1rem !important;
+    }
+}
+
+.app-header {
+    height: 96px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.app-header-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    height: 100%;
+}
+
+.app-header-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    display: block;
+}
+
+.app-header-video-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 0;
+    margin: 0 0.1rem 0 1.7rem;
+    padding-right: 0;
+    margin-top: 0;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.app-header-video {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: right center;
+    display: block;
+    margin-top: 0;
+    transform: translateX(200px);
+}
+
+.app-header-actions {
+    flex-shrink: 0;
+}
+
+@media (min-width: 992px) {
+    .app-header-actions {
+        width: 520px;
+        justify-content: flex-end;
+    }
+
+    .app-header-user-info {
+        max-width: 220px;
+        min-width: 0;
+    }
+
+    .app-header-user-email {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .app-header-actions {
+        width: 450px;
+    }
+
+    .app-header-video {
+        transform: translateX(-165px);
+    }
+}
+
+.app-header .btn.btn-sm {
+    --bs-btn-font-size: 0.98rem;
+    --bs-btn-padding-y: 0.5rem;
+    --bs-btn-padding-x: 1rem;
+}
+
+.app-mobile-video-footer {
+    display: none;
+}
+
+.my-records-back-btn {
+    background-color: #fff;
+}
+
+.my-records-back-btn:hover,
+.my-records-back-btn:focus {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
+}
+
+.my-record-card {
+    border: 1px solid #dde3ec;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.035);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.my-record-card:hover {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.045);
+    border-color: #d6deea;
+}
+
+.my-record-card-body {
+    gap: 0.2rem;
+}
+
+.my-record-card-title {
+    color: #1f2937;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.my-record-count-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #f3f6fb;
+    color: #4b5d79;
+    border: 1px solid #d7e0ee;
+    padding: 0.26rem 0.6rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.my-record-meta {
+    font-size: 0.9rem;
+}
+
+.my-record-last-entry {
+    background: #f8fafc;
+    border: 1px solid #e6ebf2;
+    border-radius: 0.6rem;
+    padding: 0.65rem 0.7rem;
+    color: #3f4d61;
+    line-height: 1.4;
+}
+
+.my-record-media-wrap {
+    border-radius: 0.65rem;
+    overflow: hidden;
+}
+
+.my-record-media {
+    display: block;
+}
+
+.my-record-media-empty {
+    color: #64748b !important;
+    font-weight: 600;
+}
+
+.my-record-card .btn.btn-primary {
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    .my-record-count-badge {
+        font-size: 0.7rem;
+        padding: 0.22rem 0.52rem;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .app-header {
+        height: 92px;
+    }
+
+    body {
+        padding-bottom: 72px;
+    }
+
+    .app-header .app-header-user-email {
+        display: none;
+    }
+
+    .app-header-user-info svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .app-header .app-header-actions {
+        gap: 0.5rem !important;
+        align-items: center !important;
+    }
+
+    .app-header-video-wrap {
+        display: none;
+    }
+
+    .app-header-logo {
+        width: 56px;
+        height: 56px;
+        transform: translateY(-6px);
+    }
+
+    .app-header .btn.btn-sm {
+        --bs-btn-font-size: 0.95rem;
+        --bs-btn-padding-y: 0.4rem;
+        --bs-btn-padding-x: 0.75rem;
+    }
+
+    .app-mobile-video-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        z-index: 1050;
+    }
+
+    .app-mobile-video-footer-media {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 5% center;
+        display: block;
+        transform: none;
     }
 }

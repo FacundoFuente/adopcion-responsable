@@ -9,44 +9,103 @@
   {{ encore_entry_script_tags('homepage') }}
 {% endblock %}
 
-{% block body %}
-<div class="container py-5">
+{% block body_class %}homepage-no-scroll{% endblock %}
 
-  <div class="row justify-content-center">
+{% block body %}
+{% set hasPrefilledDni = app.request.query.get('dni') is not empty %}
+<div class="container py-5" id="homepageApp" data-is-authenticated="{{ app.user ? '1' : '0' }}">
+
+  <div class="row justify-content-center" id="homepageSearchRow">
     <div class="col-12 col-md-8 col-lg-6">
 
-      <div class="card shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="card-title mb-3">Buscar Prontuario</h3>
-          <p class="text-muted mb-4">Ingresá el DNI para ver el historial de adopciones y agregar nuevas entradas.</p>
+      <div id="searchCardWrapper" class="card shadow-sm app-surface-card homepage-search-card{{ hasPrefilledDni ? ' d-none' : '' }}">
+        <div class="card-body">
+          <h3 class="card-title mb-2">Consultá un prontuario por DNI</h3>
+          <p class="text-muted mb-3">Ingresá 7 u 8 dígitos para ver el historial al instante.</p>
 
-          <div class="mb-3">
-            <label for="dni" class="form-label">DNI</label>
-
-            <div class="input-group">
-              <span class="input-group-text">DNI</span>
-              <input
-                type="number"
-                id="dni"
-                name="dni"
-                class="form-control"
-                placeholder="Ej: 30123456"
-                inputmode="numeric"
-              >
+          <form id="searchForm" novalidate>
+            <div class="mb-3">
+              <label for="dni" class="form-label visually-hidden">DNI</label>
+              <div class="input-group homepage-dni-group">
+                <span class="input-group-text">DNI</span>
+                <input
+                  type="text"
+                  id="dni"
+                  name="dni"
+                  class="form-control"
+                  placeholder="Ingresá 7 u 8 dígitos"
+                  inputmode="numeric"
+                  pattern="[0-9]{7,8}"
+                  maxlength="8"
+                  autocomplete="off"
+                >
+              </div>
+              <div class="invalid-feedback">
+                Ingresá un DNI válido de 7 u 8 dígitos.
+              </div>
             </div>
-          </div>
-          <div class="d-grid">
-            <button class="btn btn-primary btn-lg" id="searchButton" type="button">
-              Buscar
-            </button>
-          </div>
+            <div class="d-grid">
+              <button class="btn btn-primary btn-lg homepage-search-btn" id="searchButton" type="submit">
+                Buscar
+              </button>
+            </div>
+          </form>
+          <p class="homepage-search-trust mb-0 mt-3">Consulta privada · Carga colaborativa</p>
+          <div id="searchFeedback" class="mt-3" aria-live="polite" aria-atomic="true"></div>
         </div>
       </div>
 
-      <div class="mt-4">
-        <div id="personModal" class="card shadow-sm "></div>
+      <div id="showSearchCardWrapper" class="homepage-search-shortcut {{ hasPrefilledDni ? '' : 'd-none' }}">
+        <div class="d-grid gap-2">
+          <button class="btn d-none d-sm-none mobile-add-entry-btn" id="goToAddEntryBtn" type="button">
+            Ir a agregar entrada
+          </button>
+          <button class="btn btn-primary" id="showSearchCardBtn" type="button">
+            Buscar otro prontuario
+          </button>
+        </div>
       </div>
 
+      <div id="actionFeedback" aria-live="polite" aria-atomic="true"></div>
+      <div id="personModal" class="card shadow-sm"></div>
+
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-4{{ hasPrefilledDni ? ' d-none' : '' }}" id="homepageInfoRow">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm app-surface-card homepage-steps-card">
+        <div class="card-body">
+          <h2 class="h4 mb-2">Cómo funciona</h2>
+          <p class="text-muted mb-4">
+            Tres pasos simples para consultar y mantener un prontuario actualizado.
+          </p>
+
+          <div class="row g-3 homepage-steps-grid">
+            <div class="col-12 col-md-4">
+              <div class="h-100 rounded-3 bg-light p-3 homepage-step-card">
+                <span class="badge text-bg-dark mb-2 homepage-step-badge">1</span>
+                <h3 class="h6 mb-1 homepage-step-title">Ingresá el DNI</h3>
+                <p class="small text-muted mb-0 homepage-step-text">Buscá rápidamente un prontuario existente.</p>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="h-100 rounded-3 bg-light p-3 homepage-step-card">
+                <span class="badge text-bg-dark mb-2 homepage-step-badge">2</span>
+                <h3 class="h6 mb-1 homepage-step-title">Revisá el historial</h3>
+                <p class="small text-muted mb-0 homepage-step-text">Leé entradas previas y verificá información relevante.</p>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="h-100 rounded-3 bg-light p-3 homepage-step-card">
+                <span class="badge text-bg-dark mb-2 homepage-step-badge">3</span>
+                <h3 class="h6 mb-1 homepage-step-title">Sumá una entrada</h3>
+                <p class="small text-muted mb-0 homepage-step-text">Registrá nuevos datos para mantener el historial actualizado.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

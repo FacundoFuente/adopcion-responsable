@@ -22,6 +22,10 @@
                         </div>
 
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        {% if return_to %}
+                            <input type="hidden" name="_target_path" value="{{ return_to }}">
+                            <input type="hidden" name="_failure_path" value="{{ path('app_sign_in', { return_to: return_to }) }}">
+                        {% endif %}
 
                         {% if error %}
                             <div class="alert alert-danger py-2 mb-3">
@@ -34,7 +38,7 @@
                         </div>
 
                         <p class="mb-0 text-center">
-                            Si no tenes cuenta, podes registrarte <a href="{{ path('app_register') }}">aquí</a>
+                            Si no tenes cuenta, podes registrarte <a href="{{ return_to ? path('app_register', { return_to: return_to }) : path('app_register') }}">aquí</a>
                         </p>
                     </form>
                 </div>

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Person;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,15 +18,47 @@ class PersonRepository extends ServiceEntityRepository
     }
 
     public function findOwnerByDni(int $dni): ?Person
-{
-    return $this->createQueryBuilder('p')
-        ->andWhere('p.dni = :dni')
-        ->setParameter('dni', $dni)
-        ->orderBy('p.id', 'ASC')
-        ->setMaxResults(1)
-        ->getQuery()
-        ->getOneOrNullResult();
-}
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.dni = :dni')
+            ->setParameter('dni', $dni)
+            ->orderBy('p.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findProntuariosSummaryByOwner(User $owner, ?int $dniFilter = null): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('p.dni AS dni')
+            ->addSelect('COUNT(p.id) AS entriesCount')
+            ->addSelect('MAX(p.createdAt) AS lastEntryAt')
+            ->andWhere('p.owner = :owner')
+            ->setParameter('owner', $owner)
+            ->groupBy('p.dni')
+            ->orderBy('lastEntryAt', 'DESC');
+
+        if ($dniFilter !== null) {
+            $qb->andWhere('p.dni = :dni')->setParameter('dni', $dniFilter);
+        }
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    public function findLatestPhotoEntryByDni(int $dni): ?Person
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.dni = :dni')
+            ->andWhere('p.description LIKE :photoPrefix')
+            ->setParameter('dni', $dni)
+            ->setParameter('photoPrefix', '[FOTO] %')
+            ->orderBy('p.createdAt', 'DESC')
+            ->addOrderBy('p.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
     //    /**
     //     * @return Person[] Returns an array of Person objects

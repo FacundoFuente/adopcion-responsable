@@ -2,25 +2,281 @@
   display: none;
 }
 
-#personModal {
-  margin-top: 0;
+#homepageSearchRow,
+#homepageInfoRow {
+  margin-top: 1.5rem !important;
 }
 
-#personModal > h3 {
-  margin: 0 0 1rem;
-  padding: 0 0.25rem;
+#searchFeedback:empty {
+  display: none;
+}
+
+#actionFeedback {
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+#actionFeedback:empty {
+  display: none;
+}
+
+#actionFeedback .alert {
+  margin-bottom: 0;
+}
+
+.homepage-search-card {
+  background: #f8fafd;
+  border: 1px solid #dbe3ef;
+}
+
+.homepage-dni-group > .input-group-text,
+.homepage-dni-group > .form-control {
+  min-height: 3rem;
+}
+
+.homepage-search-btn {
+  min-height: 3rem;
+  font-weight: 600;
+}
+
+.homepage-search-trust {
+  color: #607086;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.homepage-search-shortcut {
+  margin-top: 0.25rem;
+}
+
+.homepage-steps-card {
+  border: 1px solid #dbe3ef;
+  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+}
+
+.homepage-step-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dce5f1;
+  background: #ffffff !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.homepage-step-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0d6efd 0%, #4e84ff 100%);
+}
+
+.homepage-step-card:hover {
+  border-color: #cbd8ea;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.07);
+  transform: translateY(-1px);
+}
+
+.homepage-step-badge {
+  min-width: 2rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 700;
+  background-color: #0d6efd !important;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.homepage-step-title {
+  color: #1f2b3d;
+  font-weight: 700;
+}
+
+.homepage-step-text {
+  color: #607086 !important;
+  line-height: 1.35;
+}
+
+@media (min-width: 768px) {
+  .homepage-steps-grid > [class*='col-'] {
+    position: relative;
+  }
+
+  .homepage-steps-grid > [class*='col-']:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -0.5rem;
+    width: 1rem;
+    height: 2px;
+    background: linear-gradient(90deg, #bfd0ea 0%, #d9e3f2 100%);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+}
+
+.mobile-add-entry-btn {
+  background: #fff;
+  color: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+}
+
+.mobile-add-entry-btn:hover,
+.mobile-add-entry-btn:focus {
+  background: var(--bs-primary);
+  color: #fff;
+  border-color: var(--bs-primary);
+}
+
+#personModal {
+  margin-top: 0.85rem;
+}
+
+#personModal.prontuario-shell {
+  background: #f3f5f9;
+  border: 1px solid #d8dee8;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.prontuario-header {
+  padding: 1rem 1.1rem 0.65rem;
+  border-bottom: 1px solid #d9e0ea;
+  background: #eef2f8;
+}
+
+.prontuario-subtitle {
+  color: #556276;
+  font-size: 0.9rem;
+}
+
+#personModal.prontuario-shell h3 {
+  color: #172033;
+  font-weight: 700;
+}
+
+.prontuario-count-badge {
+  align-self: flex-start;
+  background: #ffffff;
+  color: #1f3f75;
+  border: 1px solid #bfd0eb;
+  border-radius: 999px;
+  padding: 0.26rem 0.62rem;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 #entriesList {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.75rem 0.85rem 0.1rem 1.05rem;
+  position: relative;
+  /*
+   * Scroll cues: top/bottom soft shadows that indicate there is more
+   * content inside this panel. Works reliably across browsers.
+   */
+  background:
+    linear-gradient(#f3f5f9 35%, rgba(255, 255, 255, 0)) center top,
+    linear-gradient(rgba(255, 255, 255, 0), #f3f5f9 65%) center bottom,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) center top,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) center bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 18px, 100% 18px, 100% 10px, 100% 10px;
+  background-attachment: local, local, scroll, scroll;
+}
+
+#entriesList::before {
+  content: '';
+  position: absolute;
+  left: 0.47rem;
+  top: 0.9rem;
+  bottom: 0.5rem;
+  width: 2px;
+  background: linear-gradient(to bottom, #c7d3e6, #d8e1ef);
+  border-radius: 2px;
 }
 
 #entriesList .card {
-  margin-bottom: 0.75rem !important;
+  margin-bottom: 0.65rem !important;
 }
 
 #entriesList .card:last-child {
   margin-bottom: 0 !important;
+}
+
+#entriesList .app-entry-card {
+  position: relative;
+  border: 1px solid #dbe3f0;
+  border-left: 3px solid #4f77bf;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+  background: #fff;
+}
+
+#entriesList .app-entry-card--photo {
+  border-left-color: #2d7f8f;
+}
+
+#entriesList .app-entry-card::before {
+  content: '';
+  position: absolute;
+  left: -0.9rem;
+  top: 1.15rem;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  background: #4f77bf;
+  border: 2px solid #f3f5f9;
+}
+
+#entriesList .app-entry-card--photo::before {
+  background: #2d7f8f;
+}
+
+.entry-date {
+  font-size: 0.98rem;
+  color: #1f2937;
+}
+
+.entry-description {
+  color: #334155;
+  line-height: 1.45;
+}
+
+.entry-kind-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.24rem 0.54rem;
+  text-transform: uppercase;
+}
+
+.entry-kind-badge--text {
+  background: #eaf1ff;
+  color: #355f9d;
+}
+
+.entry-kind-badge--photo {
+  background: #e8f4f6;
+  color: #2f7080;
+}
+
+.entry-empty {
+  border: 1px dashed #c3cfdf;
+  background: #fff;
+}
+
+.prontuario-editor-card {
+  margin: 0 0.85rem 0.95rem !important;
+  border: 1px solid #dbe3f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 #personModal .card .card-body {
@@ -31,13 +287,114 @@
   flex-wrap: wrap;
 }
 
+#searchButton[disabled],
+#personForm [data-submit-entry="1"][disabled] {
+  cursor: not-allowed;
+}
+
+.entry-inline-feedback {
+  position: absolute;
+  right: 0;
+  top: -0.25rem;
+  z-index: 5;
+  font-size: 0.85rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.entry-inline-feedback.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (min-width: 992px) {
+  body.homepage-no-scroll #homepageApp {
+    height: auto;
+    overflow: visible;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  body.homepage-no-scroll #searchCardWrapper .card-body {
+    padding: 1rem !important;
+  }
+
+  body.homepage-no-scroll #homepageInfoRow .card .card-body {
+    padding: 1rem !important;
+  }
+
+  body.homepage-no-scroll #homepageInfoRow p,
+  body.homepage-no-scroll #homepageInfoRow .mb-4 {
+    margin-bottom: 0.6rem !important;
+  }
+
+  body.homepage-no-scroll #homepageInfoRow .g-3 {
+    --bs-gutter-y: 0.5rem;
+    --bs-gutter-x: 0.5rem;
+  }
+
+  body.homepage-no-scroll #personModal {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  body.homepage-no-scroll .prontuario-header {
+    padding: 0.75rem 0.9rem 0.55rem;
+  }
+
+  body.homepage-no-scroll #entriesList {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: clamp(210px, 33vh, 390px);
+  }
+
+  body.homepage-no-scroll #personModal > .card .card-body {
+    padding: 1rem !important;
+  }
+
+  body.homepage-no-scroll #personModal textarea#personDescription {
+    min-height: 88px;
+    max-height: 120px;
+  }
+}
+
 @media (max-width: 576px) {
+  #homepageApp {
+    padding-top: 0.95rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  #homepageSearchRow {
+    margin-top: 0.85rem !important;
+  }
+
   #personModal .card .card-body {
     padding: 1rem;
   }
 
-  #personModal > h3 {
-    margin-bottom: 0.75rem;
-    padding: 0;
+  #entriesList {
+    padding-left: 0.85rem;
+    padding-right: 0.65rem;
+  }
+
+  #entriesList::before {
+    left: 0.34rem;
+  }
+
+  #entriesList .app-entry-card::before {
+    left: -0.78rem;
+  }
+
+  .homepage-dni-group > .input-group-text,
+  .homepage-dni-group > .form-control,
+  .homepage-search-btn {
+    min-height: 2.8rem;
+  }
+
+  .homepage-search-trust {
+    font-size: 0.78rem;
   }
 }

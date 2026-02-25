@@ -23,6 +23,8 @@ security:
                  login_path: app_sign_in
                  check_path: app_sign_in
                  enable_csrf: true
+                 target_path_parameter: _target_path
+                 failure_path_parameter: _failure_path
             logout:
                  path: app_sign_out
 

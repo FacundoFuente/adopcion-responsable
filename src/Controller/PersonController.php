@@ -15,6 +15,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class PersonController extends AbstractController
 {
     private const PHOTO_ENTRY_PREFIX = '[FOTO] ';
+    private const PHOTO_ENTRY_SEPARATOR = '|';
+    private const PHOTO_MAX_INPUT_BYTES = 10485760; // 10MB
+    private const PHOTO_TARGET_MAX_DIMENSION = 1600;
+    private const PHOTO_TARGET_MAX_BYTES = 1572864; // 1.5MB aprox
 
     #[Route('/person', name: 'get.person', methods: 'GET')]
     public function getPerson(
@@ -38,26 +42,51 @@ class PersonController extends AbstractController
         if (!$entries) {
             return new JsonResponse(['status' => '404', 'message' => 'Persona sin prontuario'], 404);
         }
-        $photoUrl = $this->findPhotoUrlByDni($dni);
+
+        $mappedEntries = array_map(function (Person $p) use ($dni) {
+            $isPhotoEntry = str_starts_with($p->getDescription() ?? '', self::PHOTO_ENTRY_PREFIX);
+            $description = (string) ($p->getDescription() ?? '');
+            $photoUrl = null;
+            $publicDescription = $description;
+
+            if ($isPhotoEntry) {
+                $payload = trim(substr($description, strlen(self::PHOTO_ENTRY_PREFIX)));
+                $parts = explode(self::PHOTO_ENTRY_SEPARATOR, $payload, 2);
+
+                if (count($parts) === 2 && trim($parts[0]) !== '') {
+                    $filename = basename(trim($parts[0]));
+                    $photoUrl = $this->resolvePhotoUrlByFilename($filename);
+                    $publicDescription = trim($parts[1]);
+                } else {
+                    // Compatibilidad con entradas viejas
+                    $publicDescription = $payload;
+                    $photoUrl = $this->findLegacyPhotoUrlByDni($dni);
+                }
+            }
+
+            return [
+                'id' => $p->getId(),
+                'type' => $isPhotoEntry ? 'photo' : 'text',
+                'description' => $isPhotoEntry ? $publicDescription : $p->getDescription(),
+                'createdAt' => $p->getCreatedAt()?->format('Y-m-d H:i:s'),
+                'ownerEmail' => $p->getOwner()?->getEmail() ?? 'Usuario desconocido',
+                'photoUrl' => $isPhotoEntry ? $photoUrl : null,
+            ];
+        }, $entries);
+
+        $latestPhotoUrl = null;
+        foreach ($mappedEntries as $entry) {
+            if (($entry['type'] ?? null) === 'photo' && is_string($entry['photoUrl'] ?? null)) {
+                $latestPhotoUrl = $entry['photoUrl'];
+                break;
+            }
+        }
 
         return new JsonResponse([
             'status' => 'ok',
             'dni' => $dni,
-            'photoUrl' => $photoUrl,
-            'entries' => array_map(static function (Person $p) use ($photoUrl) {
-                $isPhotoEntry = str_starts_with($p->getDescription() ?? '', self::PHOTO_ENTRY_PREFIX);
-
-                return [
-                    'id' => $p->getId(),
-                    'type' => $isPhotoEntry ? 'photo' : 'text',
-                    'description' => $isPhotoEntry
-                        ? trim(substr((string) $p->getDescription(), strlen(self::PHOTO_ENTRY_PREFIX)))
-                        : $p->getDescription(),
-                    'createdAt' => $p->getCreatedAt()?->format('Y-m-d H:i:s'),
-                    'ownerEmail' => $p->getOwner()?->getEmail() ?? 'Usuario desconocido',
-                    'photoUrl' => $isPhotoEntry ? $photoUrl : null,
-                ];
-            }, $entries),
+            'photoUrl' => $latestPhotoUrl ?? $this->findLegacyPhotoUrlByDni($dni),
+            'entries' => $mappedEntries,
         ]);
     }
 
@@ -88,13 +117,13 @@ class PersonController extends AbstractController
         }
 
         // La primera entrada del DNI define el dueño 
-        $ownerEntry = $personRepository->findOneBy(['dni' => $dni], ['id' => 'ASC']);
+        $ownerEntry = $personRepository->findOwnerByDni($dni);
 
         // Si ya existe dueño y no soy yo -> prohibido
-        if ($ownerEntry && $ownerEntry->getOwner()?->getId() !== $user->getId()) {
+        if ($ownerEntry && !$this->canManageRecord($user, $ownerEntry)) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'No podés agregar entradas a este DNI'
+                'message' => 'Solo el email creador puede agregar entradas a este DNI'
             ], 403);
         }
 
@@ -139,6 +168,7 @@ class PersonController extends AbstractController
         }
 
         $dni = (int) preg_replace('/\D+/', '', (string) $request->request->get('dni'));
+        $photoDescription = trim((string) $request->request->get('description', ''));
         $photoFile = $request->files->get('photo');
 
         if ($dni === 0) {
@@ -155,48 +185,29 @@ class PersonController extends AbstractController
             ], 400);
         }
 
-        // Solo puede subir la foto el creador del prontuario (dueño del DNI)
-        $ownerEntry = $personRepository->findOneBy(['dni' => $dni], ['id' => 'ASC']);
-        if (!$ownerEntry) {
+        // Si el prontuario ya existe, solo puede subir la foto su dueño.
+        // Si no existe, la foto crea la primera entrada y el dueño pasa a ser el usuario actual.
+        $ownerEntry = $personRepository->findOwnerByDni($dni);
+        if ($ownerEntry && !$this->canManageRecord($user, $ownerEntry)) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'El prontuario no existe todavía'
-            ], 404);
-        }
-
-        if ($ownerEntry->getOwner()?->getId() !== $user->getId()) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'No podés agregar foto a este prontuario'
+                'message' => 'Solo el email creador puede agregar foto a este DNI'
             ], 403);
         }
 
-        $allowedMimeTypes = [
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-        ];
-        $mimeType = $photoFile->getMimeType();
-        $extension = $allowedMimeTypes[$mimeType] ?? null;
-
-        if (!$extension) {
+        $mimeType = (string) $photoFile->getMimeType();
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
             return new JsonResponse([
                 'status' => 'error',
                 'message' => 'Formato inválido. Usá JPG, PNG o WEBP'
             ], 400);
         }
 
-        if (($photoFile->getSize() ?? 0) > 5 * 1024 * 1024) {
+        if (($photoFile->getSize() ?? 0) > self::PHOTO_MAX_INPUT_BYTES) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'La imagen no puede superar los 5MB'
-            ], 400);
-        }
-
-        if ($this->findPhotoUrlByDni($dni) !== null) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'Este prontuario ya tiene una foto cargada'
+                'message' => 'La imagen no puede superar los 10MB'
             ], 400);
         }
 
@@ -208,21 +219,35 @@ class PersonController extends AbstractController
             ], 500);
         }
 
-        try {
-            $photoFile->move($uploadDir, $dni.'.'.$extension);
-        } catch (\Throwable $e) {
+        $outputExtension = $this->resolveOutputExtension();
+        if ($outputExtension === null) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'No se pudo guardar la imagen'
+                'message' => 'El servidor no soporta procesamiento de imágenes'
             ], 500);
         }
 
-        // La foto se registra como una nueva entrada del prontuario.
+        $filename = $this->generateHashedPhotoFilename($outputExtension, $uploadDir);
+        $targetPath = $uploadDir.'/'.$filename;
+
+        if (!$this->processAndStorePhoto($photoFile, $mimeType, $targetPath)) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'No se pudo procesar la imagen'
+            ], 500);
+        }
+
+        // La foto se registra como una nueva entrada del prontuario
         $photoEntry = new Person();
         $photoEntry->setDni($dni);
-        $photoEntry->setOwner($ownerEntry->getOwner());
+        $photoEntry->setOwner($ownerEntry?->getOwner() ?? $user);
         $photoEntry->setCreatedAt(new \DateTime());
-        $photoEntry->setDescription(self::PHOTO_ENTRY_PREFIX.'Se agregó la foto del prontuario');
+        $photoEntry->setDescription(
+            self::PHOTO_ENTRY_PREFIX
+            .$filename
+            .self::PHOTO_ENTRY_SEPARATOR
+            .($photoDescription !== '' ? $photoDescription : 'Se agregó la foto del prontuario')
+        );
 
         $em = $doctrine->getManager();
         $em->persist($photoEntry);
@@ -232,20 +257,224 @@ class PersonController extends AbstractController
             'status' => 'ok',
             'dni' => $dni,
             'entryId' => $photoEntry->getId(),
-            'photoUrl' => '/uploads/prontuarios/'.$dni.'.'.$extension,
+            'photoUrl' => '/uploads/prontuarios/'.$filename,
         ]);
     }
 
-    private function findPhotoUrlByDni(int $dni): ?string
+    private function generateHashedPhotoFilename(string $extension, string $uploadDir): string
     {
-        $basePath = $this->getParameter('kernel.project_dir').'/public/uploads/prontuarios/';
+        $secret = (string) $this->getParameter('kernel.secret');
+
+        do {
+            try {
+                $randomNumber = random_int(100000000, 999999999);
+            } catch (\Throwable) {
+                $randomNumber = (int) (microtime(true) * 1000000);
+            }
+            $hashedToken = hash_hmac('sha256', (string) $randomNumber, $secret);
+            $filename = substr($hashedToken, 0, 24).'.'.$extension;
+        } while (is_file($uploadDir.'/'.$filename));
+
+        return $filename;
+    }
+
+    private function resolvePhotoUrlByFilename(string $filename): ?string
+    {
+        $safeFilename = basename($filename);
+        $fullPath = rtrim($this->getParameter('kernel.project_dir').'/public/uploads/prontuarios', '/').'/'.$safeFilename;
+
+        if (!is_file($fullPath)) {
+            return null;
+        }
+
+        return '/uploads/prontuarios/'.$safeFilename;
+    }
+
+    private function findLegacyPhotoUrlByDni(int $dni): ?string
+    {
+        $basePath = rtrim($this->getParameter('kernel.project_dir').'/public/uploads/prontuarios', '/');
+        $files = [];
 
         foreach (['jpg', 'png', 'webp'] as $extension) {
-            if (is_file($basePath.$dni.'.'.$extension)) {
-                return '/uploads/prontuarios/'.$dni.'.'.$extension;
+            $legacyFile = $basePath.'/'.$dni.'.'.$extension;
+            if (is_file($legacyFile)) {
+                $files[] = $legacyFile;
+            }
+
+            $pattern = $basePath.'/'.$dni.'_*'.'.'.$extension;
+            $patternFiles = glob($pattern) ?: [];
+            foreach ($patternFiles as $file) {
+                if (is_file($file)) {
+                    $files[] = $file;
+                }
             }
         }
 
+        if ($files === []) {
+            return null;
+        }
+
+        usort($files, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        $latestFile = basename($files[0]);
+
+        return '/uploads/prontuarios/'.$latestFile;
+    }
+
+    private function resolveOutputExtension(): ?string
+    {
+        if (function_exists('imagewebp')) {
+            return 'webp';
+        }
+
+        if (function_exists('imagejpeg')) {
+            return 'jpg';
+        }
+
+        if (function_exists('imagepng')) {
+            return 'png';
+        }
+
         return null;
+    }
+
+    private function processAndStorePhoto(UploadedFile $photoFile, string $mimeType, string $targetPath): bool
+    {
+        $sourceImage = $this->createImageResource($photoFile->getPathname(), $mimeType);
+        if (!$sourceImage) {
+            return false;
+        }
+
+        $sourceWidth = imagesx($sourceImage);
+        $sourceHeight = imagesy($sourceImage);
+
+        if ($sourceWidth < 1 || $sourceHeight < 1) {
+            imagedestroy($sourceImage);
+            return false;
+        }
+
+        $maxSourceSide = max($sourceWidth, $sourceHeight);
+        $scale = $maxSourceSide > self::PHOTO_TARGET_MAX_DIMENSION
+            ? self::PHOTO_TARGET_MAX_DIMENSION / $maxSourceSide
+            : 1.0;
+
+        $targetWidth = (int) max(1, round($sourceWidth * $scale));
+        $targetHeight = (int) max(1, round($sourceHeight * $scale));
+        $targetImage = imagecreatetruecolor($targetWidth, $targetHeight);
+
+        if (!$targetImage) {
+            imagedestroy($sourceImage);
+            return false;
+        }
+
+        $targetExtension = strtolower((string) pathinfo($targetPath, PATHINFO_EXTENSION));
+        if ($targetExtension === 'jpg' || $targetExtension === 'jpeg') {
+            $background = imagecolorallocate($targetImage, 255, 255, 255);
+            imagefilledrectangle($targetImage, 0, 0, $targetWidth, $targetHeight, $background);
+        } else {
+            imagealphablending($targetImage, false);
+            imagesavealpha($targetImage, true);
+            $transparent = imagecolorallocatealpha($targetImage, 0, 0, 0, 127);
+            imagefilledrectangle($targetImage, 0, 0, $targetWidth, $targetHeight, $transparent);
+        }
+
+        imagecopyresampled(
+            $targetImage,
+            $sourceImage,
+            0,
+            0,
+            0,
+            0,
+            $targetWidth,
+            $targetHeight,
+            $sourceWidth,
+            $sourceHeight
+        );
+
+        $saved = $this->saveCompressedImage($targetImage, $targetPath);
+
+        imagedestroy($targetImage);
+        imagedestroy($sourceImage);
+
+        if (!$saved) {
+            @unlink($targetPath);
+        }
+
+        return $saved;
+    }
+
+    private function createImageResource(string $path, string $mimeType)
+    {
+        return match ($mimeType) {
+            'image/jpeg' => function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($path) : false,
+            'image/png' => function_exists('imagecreatefrompng') ? @imagecreatefrompng($path) : false,
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : false,
+            default => false,
+        };
+    }
+
+    private function saveCompressedImage($image, string $targetPath): bool
+    {
+        $extension = strtolower((string) pathinfo($targetPath, PATHINFO_EXTENSION));
+
+        if ($extension === 'webp' && function_exists('imagewebp')) {
+            foreach ([82, 74, 66, 58] as $quality) {
+                if (!@imagewebp($image, $targetPath, $quality)) {
+                    continue;
+                }
+
+                if ($this->isWithinTargetSize($targetPath) || $quality === 58) {
+                    return true;
+                }
+            }
+        }
+
+        if (($extension === 'jpg' || $extension === 'jpeg') && function_exists('imagejpeg')) {
+            foreach ([85, 78, 70, 62] as $quality) {
+                if (!@imagejpeg($image, $targetPath, $quality)) {
+                    continue;
+                }
+
+                if ($this->isWithinTargetSize($targetPath) || $quality === 62) {
+                    return true;
+                }
+            }
+        }
+
+        if ($extension === 'png' && function_exists('imagepng')) {
+            foreach ([7, 8, 9] as $compression) {
+                if (!@imagepng($image, $targetPath, $compression)) {
+                    continue;
+                }
+
+                if ($this->isWithinTargetSize($targetPath) || $compression === 9) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function isWithinTargetSize(string $path): bool
+    {
+        clearstatcache(true, $path);
+        $size = filesize($path);
+
+        return is_int($size) && $size <= self::PHOTO_TARGET_MAX_BYTES;
+    }
+
+    private function canManageRecord(User $user, Person $ownerEntry): bool
+    {
+        $owner = $ownerEntry->getOwner();
+        if (!$owner instanceof User) {
+            return false;
+        }
+
+        return $this->normalizeEmail($owner->getEmail()) === $this->normalizeEmail($user->getEmail());
+    }
+
+    private function normalizeEmail(?string $email): string
+    {
+        return mb_strtolower(trim((string) $email));
     }
 }
