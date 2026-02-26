@@ -58,7 +58,7 @@ img {
     display: block;
 }
 
-.app-header-video-wrap {
+.app-header-banner-wrap {
     flex: 1;
     display: flex;
     justify-content: flex-end;
@@ -71,7 +71,7 @@ img {
     overflow: hidden;
 }
 
-.app-header-video {
+.app-header-banner {
     width: auto;
     max-width: 100%;
     height: 100%;
@@ -79,7 +79,7 @@ img {
     object-position: right center;
     display: block;
     margin-top: 0;
-    transform: translateX(200px);
+    transform: translateX(115px);
 }
 
 .app-header-actions {
@@ -112,8 +112,8 @@ img {
         width: 450px;
     }
 
-    .app-header-video {
-        transform: translateX(-165px);
+    .app-header-banner {
+        transform: translateX(-205px);
     }
 }
 
@@ -235,7 +235,7 @@ img {
         align-items: center !important;
     }
 
-    .app-header-video-wrap {
+    .app-header-banner-wrap {
         display: none;
     }
 
