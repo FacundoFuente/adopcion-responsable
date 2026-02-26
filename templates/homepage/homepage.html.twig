@@ -57,7 +57,7 @@
 
       <div id="showSearchCardWrapper" class="homepage-search-shortcut {{ hasPrefilledDni ? '' : 'd-none' }}">
         <div class="d-grid gap-2">
-          <button class="btn d-none d-sm-none mobile-add-entry-btn" id="goToAddEntryBtn" type="button">
+          <button class="btn d-none mobile-add-entry-btn" id="goToAddEntryBtn" type="button">
             Ir a agregar entrada
           </button>
           <button class="btn btn-primary" id="showSearchCardBtn" type="button">
@@ -106,6 +106,24 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-2{{ hasPrefilledDni ? ' d-none' : '' }}" id="homepageBottomLogoRow">
+    <div class="col-12 d-flex justify-content-center">
+      <a
+        href="https://perdidosenlaciudad.com.ar"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Ir a perdidosenlaciudad.com.ar"
+      >
+        <img
+          src="{{ asset('images/logoperdidos.png') }}"
+          alt="Perdidos en la Ciudad"
+          id="homepageBottomLogo"
+          class="img-fluid"
+        >
+      </a>
     </div>
   </div>
 

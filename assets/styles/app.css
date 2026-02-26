@@ -69,7 +69,6 @@ img {
     margin-top: 0;
     height: 100%;
     overflow: hidden;
-    cursor: pointer;
 }
 
 .app-header-video {
@@ -134,8 +133,8 @@ img {
 
 .my-records-back-btn:hover,
 .my-records-back-btn:focus {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
     color: #fff;
 }
 

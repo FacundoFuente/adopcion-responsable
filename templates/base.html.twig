@@ -20,17 +20,16 @@
                     <img src="{{ asset('images/logo.svg') }}" alt="Adopción Responsable" class="app-header-logo">
                 </a>
 
-                <a
-                    href="https://perdidosenlaciudad.com.ar"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div
                     class="app-header-video-wrap"
-                    aria-label="Ir a perdidosenlaciudad.com.ar"
+                    aria-label="Banner principal"
                 >
-                    <video class="app-header-video" autoplay muted loop playsinline preload="metadata">
-                        <source src="{{ asset('videos/video.mp4') }}" type="video/mp4">
-                    </video>
-                </a>
+                    <img
+                        src="{{ asset('images/header.png') }}"
+                        alt="Perdidos en la Ciudad"
+                        class="app-header-video"
+                    >
+                </div>
 
                 <div class="h-100 d-flex justify-content-end align-items-center gap-3 app-header-actions">
                     {% if app.user %}
@@ -53,16 +52,19 @@
         </header>
         {% block body %}{% endblock %}
 
-        <a
-            href="https://perdidosenlaciudad.com.ar"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="app-mobile-video-footer"
-            aria-label="Ir a perdidosenlaciudad.com.ar"
-        >
-            <video class="app-mobile-video-footer-media" autoplay muted loop playsinline preload="metadata">
-                <source src="{{ asset('videos/video.mp4') }}" type="video/mp4">
-            </video>
-        </a>
+        {% if app.request.attributes.get('_route') == 'homepage' and app.request.query.get('dni') is empty %}
+            <a
+                id="mobileVideoFooter"
+                href="https://perdidosenlaciudad.com.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="app-mobile-video-footer"
+                aria-label="Ir a perdidosenlaciudad.com.ar"
+            >
+                <video class="app-mobile-video-footer-media" autoplay muted loop playsinline preload="metadata">
+                    <source src="{{ asset('videos/video.mp4') }}" type="video/mp4">
+                </video>
+            </a>
+        {% endif %}
     </body>
 </html>

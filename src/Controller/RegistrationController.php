@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -29,10 +31,19 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+            try {
+                $entityManager->persist($user);
+                $entityManager->flush();
+            } catch (UniqueConstraintViolationException) {
+                $form->get('email')->addError(new FormError('Ya existe una cuenta con este email'));
 
-            // do anything else you need here, like send an email
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
+                    'return_to' => $returnTo,
+                ]);
+            }
+
+            $this->addFlash('success', 'Cuenta creada correctamente. Ahora podés iniciar sesión.');
             if ($returnTo !== null) {
                 return $this->redirectToRoute('app_sign_in', ['return_to' => $returnTo]);
             }

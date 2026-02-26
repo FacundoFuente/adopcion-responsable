@@ -2,6 +2,10 @@
   display: none;
 }
 
+body.homepage-no-scroll {
+  overflow-y: auto !important;
+}
+
 #homepageSearchRow,
 #homepageInfoRow {
   margin-top: 1.5rem !important;
@@ -47,6 +51,16 @@
 
 .homepage-search-shortcut {
   margin-top: 0.25rem;
+}
+
+#homepageBottomLogo {
+  max-height: 72px;
+  width: auto;
+  filter: brightness(1.10) contrast(1.05);
+}
+
+#homepageBottomLogoRow {
+  margin-top: 3.5rem !important;
 }
 
 .homepage-steps-card {
@@ -127,9 +141,9 @@
 
 .mobile-add-entry-btn:hover,
 .mobile-add-entry-btn:focus {
-  background: var(--bs-primary);
+  background: #0b5ed7;
   color: #fff;
-  border-color: var(--bs-primary);
+  border-color: #0a58ca;
 }
 
 #personModal {
@@ -171,14 +185,11 @@
 
 #entriesList {
   margin-bottom: 0.85rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 0.75rem 0.85rem 0.1rem 1.05rem;
   position: relative;
-  /*
-   * Scroll cues: top/bottom soft shadows that indicate there is more
-   * content inside this panel. Works reliably across browsers.
-   */
+  overflow: visible;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   background:
     linear-gradient(#f3f5f9 35%, rgba(255, 255, 255, 0)) center top,
     linear-gradient(rgba(255, 255, 255, 0), #f3f5f9 65%) center bottom,
@@ -186,7 +197,7 @@
     radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) center bottom;
   background-repeat: no-repeat;
   background-size: 100% 18px, 100% 18px, 100% 10px, 100% 10px;
-  background-attachment: local, local, scroll, scroll;
+  background-attachment: scroll;
 }
 
 #entriesList::before {
@@ -198,6 +209,7 @@
   width: 2px;
   background: linear-gradient(to bottom, #c7d3e6, #d8e1ef);
   border-radius: 2px;
+  pointer-events: none;
 }
 
 #entriesList .card {
@@ -234,6 +246,12 @@
 
 #entriesList .app-entry-card--photo::before {
   background: #2d7f8f;
+  pointer-events: none;
+}
+
+#entriesList a,
+#entriesList img {
+  touch-action: pan-y;
 }
 
 .entry-date {
@@ -346,9 +364,7 @@
   }
 
   body.homepage-no-scroll #entriesList {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: clamp(210px, 33vh, 390px);
+    max-height: none;
   }
 
   body.homepage-no-scroll #personModal > .card .card-body {
@@ -362,6 +378,10 @@
 }
 
 @media (max-width: 576px) {
+  #homepageBottomLogoRow {
+    display: none !important;
+  }
+
   #homepageApp {
     padding-top: 0.95rem !important;
     padding-bottom: 1rem !important;

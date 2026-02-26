@@ -10,17 +10,19 @@
                 <div class="card-body p-4 p-md-5">
                     <h1 class="h3 text-center mb-4">REGISTRARSE</h1>
                     {{ form_start(registrationForm) }}
+                        {% set emailError = registrationForm.email.vars.errors|length > 0 ? registrationForm.email.vars.errors|first.message : '' %}
+                        {% set passwordError = registrationForm.plainPassword.vars.errors|length > 0 ? registrationForm.plainPassword.vars.errors|first.message : '' %}
                         {% if return_to %}
                             <input type="hidden" name="return_to" value="{{ return_to }}">
                         {% endif %}
                         <div class="mb-3">
                             {{ form_label(registrationForm.email, 'Email', { label_attr: { class: 'form-label' } }) }}
-                            {{ form_widget(registrationForm.email, { attr: { class: 'form-control', placeholder: 'Email' } }) }}
+                            {{ form_widget(registrationForm.email, { attr: { class: 'form-control', placeholder: 'Email', 'data-server-error': emailError } }) }}
                         </div>
 
                         <div class="mb-3">
                             {{ form_label(registrationForm.plainPassword, 'Clave', { label_attr: { class: 'form-label' } }) }}
-                            {{ form_widget(registrationForm.plainPassword, { attr: { class: 'form-control', placeholder: 'Clave' } }) }}
+                            {{ form_widget(registrationForm.plainPassword, { attr: { class: 'form-control', placeholder: 'Clave', 'data-server-error': passwordError } }) }}
                         </div>
 
                         <div class="form-check mb-2 d-flex align-items-center text-start">
@@ -55,4 +57,31 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('[data-server-error]');
+        let firstInvalid = null;
+
+        inputs.forEach((input) => {
+            const message = String(input.dataset.serverError || '').trim();
+            if (!message) {
+                return;
+            }
+
+            input.setCustomValidity(message);
+            input.addEventListener('input', function () {
+                input.setCustomValidity('');
+            }, { once: true });
+
+            if (!firstInvalid) {
+                firstInvalid = input;
+            }
+        });
+
+        if (firstInvalid) {
+            firstInvalid.focus();
+            firstInvalid.reportValidity();
+        }
+    });
+</script>
 {% endblock %}

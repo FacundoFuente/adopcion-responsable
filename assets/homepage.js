@@ -13,11 +13,21 @@ document.addEventListener('DOMContentLoaded', function () {
   const searchFeedback = document.getElementById('searchFeedback');
   const actionFeedback = document.getElementById('actionFeedback');
   const homepageInfoRow = document.getElementById('homepageInfoRow');
+  const homepageBottomLogoRow = document.getElementById('homepageBottomLogoRow');
+  const mobileVideoFooter = document.getElementById('mobileVideoFooter');
   const signInUrl = '/sign-in';
   const registerUrl = '/register';
   const isAuthenticated = homepageApp?.dataset.isAuthenticated === '1';
 
   let searchInProgress = false;
+
+  function setMobileFooterVisible(isVisible) {
+    if (!mobileVideoFooter) {
+      return;
+    }
+
+    mobileVideoFooter.classList.toggle('d-none', !isVisible);
+  }
 
   function setMobileAddEntryVisible(isVisible) {
     if (!goToAddEntryBtn) {
@@ -41,16 +51,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function setHomepageInfoVisible(isVisible) {
     if (!homepageInfoRow) {
-      return;
+      // noop
+    } else {
+      homepageInfoRow.classList.toggle('d-none', !isVisible);
     }
 
-    homepageInfoRow.classList.toggle('d-none', !isVisible);
+    if (homepageBottomLogoRow) {
+      homepageBottomLogoRow.classList.toggle('d-none', !isVisible);
+    }
   }
 
   function showSearchCard() {
     searchCardWrapper.classList.remove('d-none');
     showSearchCardWrapper.classList.add('d-none');
     setHomepageInfoVisible(true);
+    setMobileFooterVisible(true);
     setMobileAddEntryVisible(false);
     modal.classList.remove('prontuario-shell');
     modal.innerHTML = '';
@@ -65,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
     searchCardWrapper.classList.add('d-none');
     showSearchCardWrapper.classList.remove('d-none');
     setHomepageInfoVisible(false);
+    setMobileFooterVisible(false);
   }
 
   showSearchCardBtn.addEventListener('click', showSearchCard);
